@@ -1,42 +1,57 @@
+import streamlit as st
 import random
 
 NUM_ROUNDS = 5
 
-def main():
+# Initialize session state variables
+if 'round' not in st.session_state:
+    st.session_state.round = 1
+    st.session_state.score = 0
+    st.session_state.game_over = False
+    st.session_state.your_num = random.randint(1, 100)
+    st.session_state.computer_num = random.randint(1, 100)
+    st.session_state.result = ""
 
-    print("Welcome to the High-Low Game!")
-    print('--------------------------------')
+st.title("🎮 High-Low Number Game")
 
-    # Milestone 5: keep track of your score
-    your_score = 0
+if st.session_state.round <= NUM_ROUNDS and not st.session_state.game_over:
+    st.subheader(f"Round {st.session_state.round} of {NUM_ROUNDS}")
+    st.write(f"Your number is: **{st.session_state.your_num}**")
 
-    # Milestone 4: Play multiple rounds
-    for i in range(NUM_ROUNDS):
-        print(f"Round {i + 1}")
-        # Milestone 1: Generate the random numbers and print them out
-        computer_num = random.randint(1, 100)
-        your_num = random.randint(1, 100)
-        print(f"Your number is {your_num}")
+    st.write("Do you think your number is higher or lower than the computer's number?")
+    col1, col2 = st.columns(2)
 
-        # Milestone 2: Get user input for their choice
-        choice = input("Do you think your number is higher or lower than the computer's?: ")
+    with col1:
+        if st.button("🔼 Higher"):
+            if st.session_state.your_num > st.session_state.computer_num:
+                st.session_state.score += 1
+                st.session_state.result = f"✅ You were right! The computer's number was {st.session_state.computer_num}."
+            else:
+                st.session_state.result = f"❌ Aww, that's incorrect. The computer's number was {st.session_state.computer_num}."
+            st.session_state.round += 1
 
-        # Milestone 3: Map out all the ways to win the round
-        higher_and_correct = choice == "higher" and your_num > computer_num
-        lower_and_correct = choice == "lower" and your_num < computer_num
+    with col2:
+        if st.button("🔽 Lower"):
+            if st.session_state.your_num < st.session_state.computer_num:
+                st.session_state.score += 1
+                st.session_state.result = f"✅ You were right! The computer's number was {st.session_state.computer_num}."
+            else:
+                st.session_state.result = f"❌ Aww, that's incorrect. The computer's number was {st.session_state.computer_num}."
+            st.session_state.round += 1
 
-        if higher_and_correct or lower_and_correct:
-            print(f"You were right! The computer's number was {computer_num}")
-            # Milestone 5: keep track of your score
-            your_score += 1 
-        else: 
-            print(f"Aww, that's incorrect. The computer's number was {computer_num}")
+    if st.session_state.result:
+        st.markdown(st.session_state.result)
+        st.info(f"Your score is now **{st.session_state.score}**")
 
-        # Milestone 5: keep track of your score
-        print(f"Your score is now {your_score}")
-        print()
+        # Prepare for next round
+        if st.session_state.round <= NUM_ROUNDS:
+            st.session_state.your_num = random.randint(1, 100)
+            st.session_state.computer_num = random.randint(1, 100)
+        else:
+            st.session_state.game_over = True
 
-    print("Thanks for playing!")
-
-if __name__ == "__main__":
-    main()
+elif st.session_state.game_over:
+    st.success(f"🏁 Game over! Your final score is **{st.session_state.score}** out of {NUM_ROUNDS}.")
+    if st.button("🔁 Play Again"):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
